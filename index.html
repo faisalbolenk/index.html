@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulator Storan Pro</title>
+    <title>Kalkulator Floating POCO</title>
     <style>
-        /* Desain Latar & Font */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: #f7f7f7; 
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            align-items: flex-end; 
+        /* Optimasi untuk Jendela Mengambang (Sarat Fleksibilitas) */
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #f7f7f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; /* Mencegah scroll double pada window */
         }
         
         .calc-container { 
             width: 100%;
-            max-width: 420px;
             height: 100%;
             display: flex;
             flex-direction: column;
-            box-sizing: border-box;
             background: #f7f7f7;
+            padding: 2vh 3vw; /* Jarak proporsional berbasis tinggi/lebar layar */
         }
 
         /* Area Layar Angka */
@@ -33,133 +32,130 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 15px 25px;
+            padding: 1vh 2vw;
             position: relative;
+            min-height: 20%;
         }
         
         .top-bar {
             position: absolute;
-            top: 15px;
-            left: 20px;
-            right: 20px;
+            top: 5px;
+            left: 5px;
+            right: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #555;
         }
         
-        .mode-title { font-weight: 600; font-size: 16px; color: #333; }
-        .entry-counter { color: #ff7b00; font-weight: bold; font-size: 13px; background: #fff3e0; padding: 4px 8px; border-radius: 8px;}
+        .mode-title { font-weight: 600; font-size: clamp(11px, 3.5vw, 15px); color: #333; }
+        .entry-counter { color: #ff7b00; font-weight: bold; font-size: clamp(10px, 3vw, 13px); background: #fff3e0; padding: 2px 6px; border-radius: 6px;}
 
-        /* Riwayat Grand Total (=) di Atas */
+        /* Riwayat Penjumlahan */
         .grand-total-display {
-            font-size: 18px;
+            font-size: clamp(14px, 4.5vw, 18px);
             color: #10b981; 
             text-align: right;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
             font-weight: 700;
             overflow-x: auto;
             white-space: nowrap;
-            min-height: 22px;
         }
         .grand-total-display::-webkit-scrollbar { display: none; }
 
-        /* Riwayat Angka yang Sedang Diketik */
+        /* Jalur Penjumlahan Aktif */
         .history-preview { 
-            font-size: 15px; 
+            font-size: clamp(12px, 4vw, 15px); 
             color: #888; 
             text-align: right; 
-            min-height: 20px;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             overflow-x: auto;
             white-space: nowrap;
         }
         .history-preview::-webkit-scrollbar { display: none; }
         
+        /* Angka Utama Elegan */
         .display { 
             width: 100%; 
             background: transparent;
             border: none;
             text-align: right; 
-            font-size: 55px; 
+            font-size: clamp(32px, 12vw, 55px); /* Otomatis mengecil kalau jendelanya kecil */
             font-weight: 400;
             color: #000000; 
-            padding: 0;
-            margin: 0;
             outline: none;
             overflow-x: auto;
+            white-space: nowrap;
         }
         .display::-webkit-scrollbar { display: none; }
 
-        /* Area Keypad */
+        /* Container Tombol di Bawah */
         .keypad-container {
-            padding: 10px 15px 25px 15px;
+            width: 100%;
             background: #ffffff;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
         }
 
-        /* Desain Tombol Standar */
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        /* Desain Tombol Global */
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         
         button { 
             background: #f4f5f7; 
             border: none; 
-            border-radius: 16px; 
-            font-size: 24px; 
+            border-radius: 12px; 
+            font-size: clamp(18px, 6vw, 24px); 
             font-weight: 500;
             color: #111;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            aspect-ratio: 1 / 1; 
-            transition: 0.1s;
+            transition: 0.05s;
         }
-        button:active { background: #e2e4e9; transform: scale(0.96); }
+        button:active { background: #e2e4e9; transform: scale(0.95); }
         
         .text-orange { color: #ff7b00; }
-        .bg-orange { background: #ff7b00; color: #ffffff; font-weight: 600; font-size: 30px; box-shadow: 0 4px 10px rgba(255, 123, 0, 0.2);}
+        .bg-orange { background: #ff7b00; color: #ffffff; font-weight: 600; box-shadow: 0 2px 6px rgba(255, 123, 0, 0.2);}
         .bg-orange:active { background: #e66e00; }
-        .btn-action-sm { font-size: 18px; font-weight: 600; } 
+        .btn-action-sm { font-size: clamp(14px, 4.5vw, 18px); font-weight: 600; } 
 
-        /* Layout Mode Storan */
-        #custom-mode { display: flex; flex-direction: column; gap: 8px;}
+        /* Mode Storan Layout */
+        #custom-mode { display: flex; flex-direction: column; gap: 6px;}
         
-        /* Baris Hapus, Gabung, & Salin */
-        .action-row-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .btn-top { aspect-ratio: auto; height: 42px; font-size: 15px; border-radius: 10px; font-weight: 600; background: #fff0e6; color: #ff7b00;}
+        /* Baris Aksi Atas */
+        .action-row-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .btn-top { height: 38px; font-size: clamp(12px, 3.8vw, 15px); border-radius: 8px; font-weight: 600; background: #fff0e6; color: #ff7b00;}
         .btn-top-alt { background: #eff6ff; color: #3b82f6; } 
         
-        /* Baris Mode, AC, Sama Dengan (=) */
-        .action-row-mid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 8px; margin-bottom: 2px;}
-        .btn-mid { aspect-ratio: auto; height: 48px; font-size: 16px; border-radius: 12px; font-weight: bold; }
+        /* Baris Kontrol Tengah */
+        .action-row-mid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 6px; }
+        .btn-mid { height: 42px; font-size: clamp(13px, 4vw, 16px); border-radius: 10px; font-weight: bold; }
         .btn-switch { background: #f3f4f6; color: #4b5563; }
         .btn-ac { background: #fee2e2; color: #ef4444; }
 
-        /* Area Hitung Cepat */
+        /* Area Tombol Hitung */
         .fast-calc-area {
             display: flex;
             flex-direction: column;
             gap: 4px; 
             background: #fdfdfd;
-            border-radius: 16px;
-            padding: 4px;
+            border-radius: 12px;
+            padding: 3px;
             border: 1px solid #f0f0f0;
         }
 
-        /* Modifiers (-1 s/d -25) */
+        /* Tombol Penyesuaian (Kecil) */
         .modifier-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-        .btn-mod { aspect-ratio: auto; height: 42px; font-size: 14px; border-radius: 8px; font-weight: 600; background: #f4f5f7;}
+        .btn-mod { height: 36px; font-size: clamp(11px, 3.5vw, 14px); border-radius: 6px; font-weight: 600; background: #f4f5f7;}
         .mod-minus { color: #e11d48; }
         .mod-plus { color: #10b981; }
 
-        /* Tombol 4x3 Storan (Tombol Besar) */
+        /* Grid Angka Besar */
         .grid-custom-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .btn-storan { aspect-ratio: auto; height: 60px; font-size: 24px; font-weight: 600; background: #f4f5f7; border-radius: 12px;}
-        .btn-hero { background: #ff7b00; color: #fff; font-size: 32px; box-shadow: 0 4px 10px rgba(255,123,0,0.3);}
-        .btn-hero:active { background: #e66e00; }
+        .btn-storan { height: 50px; font-size: clamp(18px, 5.5vw, 24px); font-weight: 600; background: #f4f5f7; border-radius: 10px;}
+        .btn-hero { background: #ff7b00; color: #fff; font-size: clamp(22px, 7vw, 32px); }
     </style>
 </head>
 <body>
@@ -181,35 +177,34 @@
             
             <div id="standard-mode" style="display: none;">
                 <div class="btn-grid">
-                    <button class="btn-action-sm text-orange" onclick="handleClear()">AC</button>
-                    <button class="text-orange" onclick="handleBackspace()">⌫</button>
-                    <button class="btn-action-sm text-orange" onclick="appendStd('%')">%</button>
-                    <button class="text-orange" onclick="appendStd('/')">÷</button>
+                    <button class="btn-action-sm text-orange" style="height:50px;" onclick="handleClear()">AC</button>
+                    <button class="text-orange" style="height:50px;" onclick="handleBackspace()">⌫</button>
+                    <button class="btn-action-sm text-orange" style="height:50px;" onclick="appendStd('%')">%</button>
+                    <button class="text-orange" style="height:50px;" onclick="appendStd('/')">÷</button>
                     
-                    <button onclick="appendStd('7')">7</button>
-                    <button onclick="appendStd('8')">8</button>
-                    <button onclick="appendStd('9')">9</button>
-                    <button class="text-orange" onclick="appendStd('*')">×</button>
+                    <button style="height:50px;" onclick="appendStd('7')">7</button>
+                    <button style="height:50px;" onclick="appendStd('8')">8</button>
+                    <button style="height:50px;" onclick="appendStd('9')">9</button>
+                    <button class="text-orange" style="height:50px;" onclick="appendStd('*')">×</button>
                     
-                    <button onclick="appendStd('4')">4</button>
-                    <button onclick="appendStd('5')">5</button>
-                    <button onclick="appendStd('6')">6</button>
-                    <button class="text-orange" onclick="appendStd('-')">-</button>
+                    <button style="height:50px;" onclick="appendStd('4')">4</button>
+                    <button style="height:50px;" onclick="appendStd('5')">5</button>
+                    <button style="height:50px;" onclick="appendStd('6')">6</button>
+                    <button class="text-orange" style="height:50px;" onclick="appendStd('-')">-</button>
                     
-                    <button onclick="appendStd('1')">1</button>
-                    <button onclick="appendStd('2')">2</button>
-                    <button onclick="appendStd('3')">3</button>
-                    <button class="text-orange" onclick="appendStd('+')">+</button>
+                    <button style="height:50px;" onclick="appendStd('1')">1</button>
+                    <button style="height:50px;" onclick="appendStd('2')">2</button>
+                    <button style="height:50px;" onclick="appendStd('3')">3</button>
+                    <button class="text-orange" style="height:50px;" onclick="appendStd('+')">+</button>
                     
-                    <button class="text-orange btn-action-sm" style="background:#f3f4f6; color:#4b5563;" onclick="toggleMode()">🔄 Mode</button>
-                    <button onclick="appendStd('0')">0</button>
-                    <button onclick="appendStd('.')">,</button>
-                    <button class="bg-orange" onclick="calculateStd()">=</button>
+                    <button class="text-orange btn-action-sm" style="height:50px; background:#f3f4f6; color:#4b5563;" onclick="toggleMode()">🔄 Mode</button>
+                    <button style="height:50px;" onclick="appendStd('0')">0</button>
+                    <button style="height:50px;" onclick="appendStd('.')">,</button>
+                    <button class="bg-orange" style="height:50px;" onclick="calculateStd()">=</button>
                 </div>
             </div>
 
             <div id="custom-mode">
-                
                 <div class="action-row-top">
                     <button class="btn-top" onclick="handleBackspace()">⌫ Hapus</button>
                     <button class="btn-top btn-top-alt" onclick="handleGabung()">🔗 Gabung</button>
@@ -223,7 +218,6 @@
                 </div>
 
                 <div class="fast-calc-area">
-                    
                     <div class="modifier-row">
                         <button class="btn-mod mod-minus" onclick="pressSmallBtn(-1)">-1</button>
                         <button class="btn-mod mod-minus" onclick="pressSmallBtn(-5)">-5</button>
@@ -259,9 +253,7 @@
                         <button class="btn-storan" onclick="pressLargeBtn(260)">260</button>
                         <button class="btn-storan" onclick="pressLargeBtn(390)">390</button>
                     </div>
-
                 </div>
-
             </div>
 
         </div>
@@ -269,11 +261,9 @@
 
     <script>
         let isCustomMode = true;
-        
         let totalSum = 0;
         let currentInput = null; 
         let customLogs = [];
-
         let grandTotal = 0;
         let grandHistory = [];
 
@@ -305,19 +295,13 @@
         function updateCustomDisplay() {
             let activeNum = currentInput !== null ? currentInput : 0;
             let displayValue = totalSum + activeNum;
-            
             displayEl.innerText = formatNumber(displayValue);
 
             let tempLogs = [...customLogs];
             if (currentInput !== null) tempLogs.push(currentInput); 
-            
             counterEl.innerText = "Data: " + tempLogs.length;
 
-            if (tempLogs.length > 0) {
-                previewEl.innerText = tempLogs.join(" + ");
-            } else {
-                previewEl.innerText = "";
-            }
+            previewEl.innerText = tempLogs.length > 0 ? tempLogs.join(" + ") : "";
             
             if (grandHistory.length > 0) {
                 grandTotalEl.innerHTML = grandHistory.map(formatNumber).join(' + ') + ` = <span style="color:#ff7b00">${formatNumber(grandTotal)}</span>`;
@@ -330,10 +314,8 @@
             grandTotalEl.scrollLeft = grandTotalEl.scrollWidth;
         }
 
-        // FUNGSI GABUNG (MERGE) 2 ANGKA TERAKHIR
         function handleGabung() {
             if (!isCustomMode) return;
-
             if (currentInput !== null) {
                 if (customLogs.length > 0) {
                     let prevNum = customLogs.pop();
@@ -355,27 +337,17 @@
         function commitToGrandTotal() {
             let activeNum = currentInput !== null ? currentInput : 0;
             let currentDisplayValue = totalSum + activeNum;
-
             if (currentDisplayValue === 0 && customLogs.length === 0) return;
 
             grandHistory.push(currentDisplayValue);
             grandTotal += currentDisplayValue;
-
-            totalSum = 0;
-            currentInput = null;
-            customLogs = [];
-            
+            totalSum = 0; currentInput = null; customLogs = [];
             updateCustomDisplay();
         }
 
         let stdExpression = "";
         function appendStd(val) {
             if (displayEl.innerText === "0" || displayEl.innerText === "Error") stdExpression = "";
-            
-            let viewVal = val;
-            if(val === '*') viewVal = '×';
-            if(val === '/') viewVal = '÷';
-            
             stdExpression += val;
             displayEl.innerText = stdExpression.replace(/\*/g, '×').replace(/\//g, '÷');
             displayEl.scrollLeft = displayEl.scrollWidth;
@@ -386,7 +358,6 @@
                 if(!stdExpression) return;
                 let result = eval(stdExpression);
                 if(result.toString().length > 10) result = parseFloat(result.toFixed(5));
-                
                 displayEl.innerText = formatNumber(result);
                 stdExpression = result.toString();
             } catch(e) {
@@ -404,16 +375,14 @@
                     } else {
                         currentInput = null;
                     }
-                    updateCustomDisplay();
                 } else if (customLogs.length > 0) {
                     currentInput = customLogs.pop();
                     totalSum -= currentInput;
-                    updateCustomDisplay();
-                } else if (grandHistory.length > 0 && totalSum === 0 && currentInput === null) {
+                } else if (grandHistory.length > 0) {
                     let removed = grandHistory.pop();
                     grandTotal -= removed;
-                    updateCustomDisplay();
                 }
+                updateCustomDisplay();
             } else {
                 if (stdExpression.length > 0) {
                     stdExpression = stdExpression.slice(0, -1);
@@ -425,25 +394,17 @@
         function handleClear() {
             if (isCustomMode) {
                 if (totalSum === 0 && currentInput === null && customLogs.length === 0) {
-                    grandTotal = 0;
-                    grandHistory = [];
+                    grandTotal = 0; grandHistory = [];
                 }
-                totalSum = 0; 
-                currentInput = null; 
-                customLogs = [];
+                totalSum = 0; currentInput = null; customLogs = [];
                 updateCustomDisplay();
             } else {
-                stdExpression = "";
-                displayEl.innerText = "0";
-                previewEl.innerText = "";
+                stdExpression = ""; displayEl.innerText = "0"; previewEl.innerText = "";
             }
         }
 
         function copyResult() {
-            let textToCopy = grandTotal > 0 && totalSum === 0 && currentInput === null 
-                ? grandTotal.toString() 
-                : displayEl.innerText.replace(/\./g, ""); 
-            
+            let textToCopy = grandTotal > 0 && totalSum === 0 && currentInput === null ? grandTotal.toString() : displayEl.innerText.replace(/\./g, ""); 
             navigator.clipboard.writeText(textToCopy).then(() => {
                 alert("Berhasil menyalin angka: " + formatNumber(textToCopy));
             });
@@ -453,11 +414,9 @@
             isCustomMode = !isCustomMode;
             document.getElementById('custom-mode').style.display = isCustomMode ? 'flex' : 'none';
             document.getElementById('standard-mode').style.display = isCustomMode ? 'none' : 'block';
-            
             titleEl.innerText = isCustomMode ? 'Mode Storan' : 'Kalkulator Biasa';
             counterEl.style.display = isCustomMode ? 'block' : 'none'; 
             grandTotalEl.style.display = isCustomMode ? 'block' : 'none';
-            
             handleClear(); 
         }
     </script>
