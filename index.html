@@ -2,348 +2,464 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kalkulator Pati 5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Storan Pro</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
+        /* Desain Latar & Font */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f7f7f7; 
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            align-items: flex-end; 
+        }
         
-        /* GAYA UNTUK TAB (MENU ATAS) */
-        .tab-container { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95em; cursor: pointer; background: #ddd; color: #555; transition: 0.2s; }
-        .tab-btn.active { background: #007bff; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .calc-container { 
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: #f7f7f7;
+        }
 
-        /* GAYA UMUM KALKULATOR */
-        .date-badge { background: #17a2b8; color: white; text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 0.95em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        h3 { margin-top: 0; color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 5px; font-size: 1.1em; display: flex; justify-content: space-between; align-items: center; }
-        .auto-save-status { font-size: 0.65em; color: #28a745; font-weight: normal; }
-        label { display: block; font-size: 0.8em; font-weight: bold; margin-top: 8px; color: #555; }
-        input { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; text-align: center; font-size: 1em; }
-        .btn-container { display: flex; justify-content: center; margin-top: 15px; gap: 10px; }
-        .btn-hapus { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.9em; cursor: pointer; color: white; background: #dc3545; }
+        /* Area Layar Angka */
+        .display-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 15px 25px;
+            position: relative;
+        }
+        
+        .top-bar {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #555;
+        }
+        
+        .mode-title { font-weight: 600; font-size: 16px; color: #333; }
+        .entry-counter { color: #ff7b00; font-weight: bold; font-size: 13px; background: #fff3e0; padding: 4px 8px; border-radius: 8px;}
 
-        /* GAYA KHUSUS REKAP */
-        .res-box { padding: 8px; margin-top: 8px; border-radius: 8px; background: #e7f3ff; border-left: 4px solid #28a745; font-size: 0.85em; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8em; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
-        th { background: #f8f9fa; color: #333; }
-        .hasil-cell { background: #fdfdfd; font-size: 0.9em; line-height: 1.4; color: #333; }
-        .label-cell { font-weight: bold; color: #555; text-align: left; }
+        /* Riwayat Grand Total (=) di Atas */
+        .grand-total-display {
+            font-size: 18px;
+            color: #10b981; 
+            text-align: right;
+            margin-bottom: 8px;
+            font-weight: 700;
+            overflow-x: auto;
+            white-space: nowrap;
+            min-height: 22px;
+        }
+        .grand-total-display::-webkit-scrollbar { display: none; }
 
-        /* GAYA KHUSUS STORAN */
-        .result-box { padding: 12px; margin-top: 10px; border-radius: 8px; text-align: center; font-weight: bold; color: white; font-size: 1em; }
-        .bg-storan { background-color: #007bff; }
-        .bg-persen { background-color: #28a745; }
-        .bg-final { background-color: #dc3545; }
-        .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 15px; }
+        /* Riwayat Angka yang Sedang Diketik */
+        .history-preview { 
+            font-size: 15px; 
+            color: #888; 
+            text-align: right; 
+            min-height: 20px;
+            margin-bottom: 5px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .history-preview::-webkit-scrollbar { display: none; }
+        
+        .display { 
+            width: 100%; 
+            background: transparent;
+            border: none;
+            text-align: right; 
+            font-size: 55px; 
+            font-weight: 400;
+            color: #000000; 
+            padding: 0;
+            margin: 0;
+            outline: none;
+            overflow-x: auto;
+        }
+        .display::-webkit-scrollbar { display: none; }
+
+        /* Area Keypad */
+        .keypad-container {
+            padding: 10px 15px 25px 15px;
+            background: #ffffff;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+        }
+
+        /* Desain Tombol Standar */
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        
+        button { 
+            background: #f4f5f7; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 24px; 
+            font-weight: 500;
+            color: #111;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1; 
+            transition: 0.1s;
+        }
+        button:active { background: #e2e4e9; transform: scale(0.96); }
+        
+        .text-orange { color: #ff7b00; }
+        .bg-orange { background: #ff7b00; color: #ffffff; font-weight: 600; font-size: 30px; box-shadow: 0 4px 10px rgba(255, 123, 0, 0.2);}
+        .bg-orange:active { background: #e66e00; }
+        .btn-action-sm { font-size: 18px; font-weight: 600; } 
+
+        /* Layout Mode Storan */
+        #custom-mode { display: flex; flex-direction: column; gap: 8px;}
+        
+        /* Baris Hapus, Gabung, & Salin */
+        .action-row-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .btn-top { aspect-ratio: auto; height: 42px; font-size: 15px; border-radius: 10px; font-weight: 600; background: #fff0e6; color: #ff7b00;}
+        .btn-top-alt { background: #eff6ff; color: #3b82f6; } 
+        
+        /* Baris Mode, AC, Sama Dengan (=) */
+        .action-row-mid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 8px; margin-bottom: 2px;}
+        .btn-mid { aspect-ratio: auto; height: 48px; font-size: 16px; border-radius: 12px; font-weight: bold; }
+        .btn-switch { background: #f3f4f6; color: #4b5563; }
+        .btn-ac { background: #fee2e2; color: #ef4444; }
+
+        /* Area Hitung Cepat */
+        .fast-calc-area {
+            display: flex;
+            flex-direction: column;
+            gap: 4px; 
+            background: #fdfdfd;
+            border-radius: 16px;
+            padding: 4px;
+            border: 1px solid #f0f0f0;
+        }
+
+        /* Modifiers (-1 s/d -25) */
+        .modifier-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        .btn-mod { aspect-ratio: auto; height: 42px; font-size: 14px; border-radius: 8px; font-weight: 600; background: #f4f5f7;}
+        .mod-minus { color: #e11d48; }
+        .mod-plus { color: #10b981; }
+
+        /* Tombol 4x3 Storan (Tombol Besar) */
+        .grid-custom-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .btn-storan { aspect-ratio: auto; height: 60px; font-size: 24px; font-weight: 600; background: #f4f5f7; border-radius: 12px;}
+        .btn-hero { background: #ff7b00; color: #fff; font-size: 32px; box-shadow: 0 4px 10px rgba(255,123,0,0.3);}
+        .btn-hero:active { background: #e66e00; }
     </style>
 </head>
 <body>
 
-    <!-- TOMBOL MENU TAB -->
-    <div class="tab-container">
-        <button class="tab-btn active" onclick="bukaTab(event, 'menu-rekap')">📝 Kalkulator Rekap</button>
-        <button class="tab-btn" onclick="bukaTab(event, 'menu-storan')">💰 Kalkulator Storan</button>
-    </div>
-
-    <!-- TANGGAL -->
-    <div class="date-badge" id="tanggal-hari-ini">Memuat tanggal...</div>
-
-    <!-- ========================================== -->
-    <!-- TAB 1: KALKULATOR REKAP                    -->
-    <!-- ========================================== -->
-    <div id="menu-rekap" class="tab-content active">
-        <div class="card">
-            <h3>
-                <span>1. Kalkulator Rekap</span>
-                <span class="auto-save-status">✅ Auto-Save Aktif</span>
-            </h3>
-            <label>Drop:</label>
-            <input type="number" id="d1" oninput="hitungRekap()" placeholder="Isi Drop">
-            <label>Jml Drop lalu:</label>
-            <input type="number" id="d2" oninput="hitungRekap()" placeholder="Isi Jml Drop lalu">
-            <div class="res-box" id="hDrop">Jml Drop : 0</div>
-
-            <label>Storting:</label>
-            <input type="number" id="s1" oninput="hitungRekap()" placeholder="Isi Storting">
-            <label>Jml Storting lalu:</label>
-            <input type="number" id="s2" oninput="hitungRekap()" placeholder="Isi Jml Storting lalu">
-            <div class="res-box" id="hStort">Jml Storting : 0</div>
-
-            <label>Sirkulasi (Drop*1.3 - Stort + Sirk):</label>
-            <input type="number" id="drRec" oninput="hitungRekap()" placeholder="Drop (otomatis)">
-            <input type="number" id="stRec" oninput="hitungRekap()" placeholder="Stort (otomatis)">
-            <input type="number" id="siRec" oninput="hitungRekap()" placeholder="Isi Sirkulasi lalu">
-            <div class="res-box" id="hSirkulasi">Saldo Sirkulasi : 0</div>
-        </div>
-
-        <div class="card">
-            <h3>2. Kalkulator CM, MB, ML</h3>
-            <table>
-                <tr><th>Data</th><th>CM</th><th>MB</th><th>ML</th></tr>
-                <tr><td class="label-cell">Angsuran</td>
-                    <td><input type="number" id="a1" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="a2" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="a3" oninput="hitungRekap()"></td>
-                </tr>
-                <tr><td class="label-cell">Jmlh lalu</td>
-                    <td><input type="number" id="j1" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="j2" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="j3" oninput="hitungRekap()"></td>
-                </tr>
-                <tr><td class="label-cell">Sldo lalu</td>
-                    <td><input type="number" id="sa1" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="sa2" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="sa3" oninput="hitungRekap()"></td>
-                </tr>
-                <tr><td class="label-cell">Program</td>
-                    <td><input type="number" id="p1" oninput="hitungRekap()"></td>
-                    <td><input type="number" id="p2" oninput="hitungRekap()"></td>
-                    <td>-</td>
-                </tr>
-                <tr><td class="label-cell"><b>Hasil</b></td>
-                    <td class="hasil-cell" id="res1">-</td>
-                    <td class="hasil-cell" id="res2">-</td>
-                    <td class="hasil-cell" id="res3">-</td>
-                </tr>
-            </table>
-            <div class="btn-container">
-                <button class="btn-hapus" onclick="hapusData('rekap')">🗑️ Kosongkan Data Rekap</button>
+    <div class="calc-container" id="app">
+        
+        <div class="display-container">
+            <div class="top-bar">
+                <div class="mode-title" id="mode-title">Mode Storan</div>
+                <div class="entry-counter" id="entry-counter">Data: 0</div>
             </div>
+            
+            <div class="grand-total-display" id="grand-total-display"></div>
+            <div class="history-preview" id="history-preview"></div>
+            <div class="display" id="display">0</div>
         </div>
-    </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 2: KALKULATOR STORAN                   -->
-    <!-- ========================================== -->
-    <div id="menu-storan" class="tab-content">
-        <div class="card">
-            <h3>
-                <span>💰 Kalkulator Storan</span>
-                <span class="auto-save-status">✅ Auto-Save Aktif</span>
-            </h3>
+        <div class="keypad-container">
             
-            <label>Drop:</label>
-            <input type="number" id="st_drop" oninput="hitungStoran()" placeholder="0">
-            
-            <label>Kasbon:</label>
-            <input type="number" id="st_kasbon" oninput="hitungStoran()" placeholder="0">
-            
-            <label>Storting:</label>
-            <input type="number" id="st_storting" oninput="hitungStoran()" placeholder="0">
-            
-            <label>Transport:</label>
-            <input type="number" id="st_transport" oninput="hitungStoran()" placeholder="0">
-            
-            <div class="result-box bg-storan" id="hasilStoran">Storan: 0</div>
-            <div class="result-box bg-persen" id="hasil9persen">9% Drop: 0</div>
-            <div class="result-box bg-final" id="hasilSelisih">Tunai: 0</div>
-
-            <div class="btn-container">
-                <button class="btn-hapus" onclick="hapusData('storan')">🗑️ Kosongkan Data Storan</button>
+            <div id="standard-mode" style="display: none;">
+                <div class="btn-grid">
+                    <button class="btn-action-sm text-orange" onclick="handleClear()">AC</button>
+                    <button class="text-orange" onclick="handleBackspace()">⌫</button>
+                    <button class="btn-action-sm text-orange" onclick="appendStd('%')">%</button>
+                    <button class="text-orange" onclick="appendStd('/')">÷</button>
+                    
+                    <button onclick="appendStd('7')">7</button>
+                    <button onclick="appendStd('8')">8</button>
+                    <button onclick="appendStd('9')">9</button>
+                    <button class="text-orange" onclick="appendStd('*')">×</button>
+                    
+                    <button onclick="appendStd('4')">4</button>
+                    <button onclick="appendStd('5')">5</button>
+                    <button onclick="appendStd('6')">6</button>
+                    <button class="text-orange" onclick="appendStd('-')">-</button>
+                    
+                    <button onclick="appendStd('1')">1</button>
+                    <button onclick="appendStd('2')">2</button>
+                    <button onclick="appendStd('3')">3</button>
+                    <button class="text-orange" onclick="appendStd('+')">+</button>
+                    
+                    <button class="text-orange btn-action-sm" style="background:#f3f4f6; color:#4b5563;" onclick="toggleMode()">🔄 Mode</button>
+                    <button onclick="appendStd('0')">0</button>
+                    <button onclick="appendStd('.')">,</button>
+                    <button class="bg-orange" onclick="calculateStd()">=</button>
+                </div>
             </div>
+
+            <div id="custom-mode">
+                
+                <div class="action-row-top">
+                    <button class="btn-top" onclick="handleBackspace()">⌫ Hapus</button>
+                    <button class="btn-top btn-top-alt" onclick="handleGabung()">🔗 Gabung</button>
+                    <button class="btn-top" onclick="copyResult()">📋 Salin</button>
+                </div>
+
+                <div class="action-row-mid">
+                    <button class="btn-mid btn-switch" onclick="toggleMode()">🔄 Mode</button>
+                    <button class="btn-mid btn-ac" onclick="handleClear()">AC</button>
+                    <button class="btn-mid bg-orange" onclick="commitToGrandTotal()">= Simpan</button>
+                </div>
+
+                <div class="fast-calc-area">
+                    
+                    <div class="modifier-row">
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-1)">-1</button>
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-5)">-5</button>
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-10)">-10</button>
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-15)">-15</button>
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-20)">-20</button>
+                        <button class="btn-mod mod-minus" onclick="pressSmallBtn(-25)">-25</button>
+                    </div>
+
+                    <div class="modifier-row">
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(1)">+1</button>
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(5)">+5</button>
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(10)">+10</button>
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(15)">+15</button>
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(20)">+20</button>
+                        <button class="btn-mod mod-plus" onclick="pressSmallBtn(25)">+25</button>
+                    </div>
+
+                    <div class="grid-custom-large">
+                        <button class="btn-storan" onclick="pressLargeBtn(30)">30</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(50)">50</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(52)">52</button>
+                        
+                        <button class="btn-storan" onclick="pressLargeBtn(80)">80</button>
+                        <button class="btn-storan btn-hero" onclick="pressLargeBtn(65)">65</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(100)">100</button>
+                        
+                        <button class="btn-storan" onclick="pressLargeBtn(104)">104</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(130)">130</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(150)">150</button>
+
+                        <button class="btn-storan" onclick="pressLargeBtn(195)">195</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(260)">260</button>
+                        <button class="btn-storan" onclick="pressLargeBtn(390)">390</button>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </div>
-    
-    <div class="footer">Dibuat oleh: <b>Sigit Ari Wibowo (Pati 5)</b></div>
 
     <script>
-        // SCRIPT PINDAH TAB
-        function bukaTab(evt, namaTab) {
-            let i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
+        let isCustomMode = true;
+        
+        let totalSum = 0;
+        let currentInput = null; 
+        let customLogs = [];
+
+        let grandTotal = 0;
+        let grandHistory = [];
+
+        const displayEl = document.getElementById('display');
+        const previewEl = document.getElementById('history-preview');
+        const counterEl = document.getElementById('entry-counter');
+        const titleEl = document.getElementById('mode-title');
+        const grandTotalEl = document.getElementById('grand-total-display');
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+        }
+
+        function pressLargeBtn(val) {
+            if (currentInput !== null) {
+                totalSum += currentInput;
+                customLogs.push(currentInput);
             }
-            tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            document.getElementById(namaTab).classList.add("active");
-            evt.currentTarget.classList.add("active");
+            currentInput = val;
+            updateCustomDisplay();
         }
 
-        // FORMAT RIBUAN MANUAL (ANTI EROR UNTUK SEMUA HP)
-        function formatAngka(num) {
-            if(isNaN(num)) return "0";
-            let parts = num.toString().split(".");
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            return parts.join(",");
+        function pressSmallBtn(modifier) {
+            if (currentInput === null) currentInput = 0;
+            currentInput += modifier;
+            updateCustomDisplay();
         }
 
-        // TANGGAL MANUAL (ANTI EROR UNTUK SEMUA HP)
-        function tampilkanTanggal() {
-            const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            let d = new Date();
-            let teksTanggal = hari[d.getDay()] + ', ' + d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
-            document.getElementById('tanggal-hari-ini').innerText = teksTanggal;
-        }
+        function updateCustomDisplay() {
+            let activeNum = currentInput !== null ? currentInput : 0;
+            let displayValue = totalSum + activeNum;
+            
+            displayEl.innerText = formatNumber(displayValue);
 
-        // FORMAT TANGGAL UNTUK SISTEM ROLLOVER GANTI HARI
-        function getTodayString() {
-            let d = new Date();
-            let y = d.getFullYear();
-            let m = ('0' + (d.getMonth() + 1)).slice(-2);
-            let day = ('0' + d.getDate()).slice(-2);
-            return y + '-' + m + '-' + day;
-        }
+            let tempLogs = [...customLogs];
+            if (currentInput !== null) tempLogs.push(currentInput); 
+            
+            counterEl.innerText = "Data: " + tempLogs.length;
 
-        // ARRAY ID UNTUK AUTO SAVE (Ditambah drRec dan stRec agar sirkulasi aman)
-        const rekapIds = ['d1', 'd2', 's1', 's2', 'drRec', 'stRec', 'siRec', 'a1', 'a2', 'a3', 'j1', 'j2', 'j3', 'sa1', 'sa2', 'sa3', 'p1', 'p2'];
-        const storanIds = ['st_drop', 'st_kasbon', 'st_storting', 'st_transport'];
-        const semuaIds = rekapIds.concat(storanIds);
-
-        // =====================================
-        // FUNGSI HITUNG REKAP
-        // =====================================
-        function hitungRekap() {
-            document.getElementById('drRec').value = document.getElementById('d1').value;
-            document.getElementById('stRec').value = document.getElementById('s1').value;
-
-            let d1 = parseFloat(document.getElementById('d1').value) || 0;
-            let d2 = parseFloat(document.getElementById('d2').value) || 0;
-            document.getElementById('hDrop').innerText = "Jml Drop : " + formatAngka(d1 + d2);
-
-            let s1 = parseFloat(document.getElementById('s1').value) || 0;
-            let s2 = parseFloat(document.getElementById('s2').value) || 0;
-            document.getElementById('hStort').innerText = "Jml Storting : " + formatAngka(s1 + s2);
-
-            let dr = parseFloat(document.getElementById('drRec').value) || 0;
-            let st = parseFloat(document.getElementById('stRec').value) || 0;
-            let si = parseFloat(document.getElementById('siRec').value) || 0;
-            let sirk = (dr * 1.3) - st + si;
-            document.getElementById('hSirkulasi').innerText = "Saldo Sirkulasi : " + formatAngka(sirk);
-
-            for(let i=1; i<=3; i++) {
-                let a = parseFloat(document.getElementById('a'+i).value) || 0;
-                let j = parseFloat(document.getElementById('j'+i).value) || 0;
-                let sa = parseFloat(document.getElementById('sa'+i).value) || 0;
-                let p = parseFloat(document.getElementById('p'+(i==3?1:i)).value) || 1;
-                
-                let hasil = a + j;
-                let sisa = sa - a;
-                let persentase = (i == 3) ? "" : ("<br><b>" + (sisa / p).toFixed(2) + "%</b>");
-                
-                document.getElementById('res'+i).innerHTML = `Jml: ${formatAngka(hasil)}<br>Sld: ${formatAngka(sisa)}${persentase}`;
-            }
-            simpanData();
-        }
-
-        // =====================================
-        // FUNGSI HITUNG STORAN
-        // =====================================
-        function hitungStoran() {
-            let drop = parseFloat(document.getElementById('st_drop').value) || 0;
-            let kasbon = parseFloat(document.getElementById('st_kasbon').value) || 0;
-            let storting = parseFloat(document.getElementById('st_storting').value) || 0;
-            let transport = parseFloat(document.getElementById('st_transport').value) || 0;
-
-            let storan = (drop * 0.20) + kasbon + storting - drop - transport;
-            let persen9 = drop * 0.09;
-            let tunai = storan - persen9;
-
-            document.getElementById('hasilStoran').innerText = "Storan: " + formatAngka(storan);
-            document.getElementById('hasil9persen').innerText = "9% Drop: " + formatAngka(persen9);
-            document.getElementById('hasilSelisih').innerText = "Tunai: " + formatAngka(tunai);
-
-            simpanData();
-        }
-
-        // =====================================
-        // MANAJEMEN PENYIMPANAN
-        // =====================================
-        function simpanData() {
-            let dataObj = {};
-            semuaIds.forEach(id => {
-                if(document.getElementById(id)) {
-                    dataObj[id] = document.getElementById(id).value;
-                }
-            });
-            let todayStr = getTodayString();
-            let finalData = { lastDate: todayStr, values: dataObj };
-            localStorage.setItem('kalkulatorPati5_Full', JSON.stringify(finalData));
-        }
-
-        function muatData() {
-            tampilkanTanggal();
-            let savedData = localStorage.getItem('kalkulatorPati5_Full');
-
-            if(savedData) {
-                let parsed = JSON.parse(savedData);
-                let todayStr = getTodayString();
-                
-                let dataObj = parsed.values ? parsed.values : parsed;
-                let lastDate = parsed.lastDate || todayStr;
-
-                // GANTI HARI (ROLLOVER HANYA UNTUK REKAP)
-                if (lastDate !== todayStr) {
-                    let old_d1 = parseFloat(dataObj['d1']) || 0;
-                    let old_d2 = parseFloat(dataObj['d2']) || 0;
-                    let old_s1 = parseFloat(dataObj['s1']) || 0;
-                    let old_s2 = parseFloat(dataObj['s2']) || 0;
-                    let old_drRec = parseFloat(dataObj['drRec']) || 0;
-                    let old_stRec = parseFloat(dataObj['stRec']) || 0;
-                    let old_siRec = parseFloat(dataObj['siRec']) || 0;
-
-                    let totalDropKemarin = old_d1 + old_d2;
-                    let totalStortKemarin = old_s1 + old_s2;
-                    let totalSirkKemarin = (old_drRec * 1.3) - old_stRec + old_siRec;
-
-                    dataObj['d2'] = totalDropKemarin !== 0 ? totalDropKemarin : '';
-                    dataObj['s2'] = totalStortKemarin !== 0 ? totalStortKemarin : '';
-                    dataObj['siRec'] = totalSirkKemarin !== 0 ? totalSirkKemarin : '';
-
-                    dataObj['d1'] = ''; dataObj['s1'] = ''; dataObj['drRec'] = ''; dataObj['stRec'] = '';
-
-                    for(let i=1; i<=3; i++) {
-                        let old_a = parseFloat(dataObj['a'+i]) || 0;
-                        let old_j = parseFloat(dataObj['j'+i]) || 0;
-                        let old_sa = parseFloat(dataObj['sa'+i]) || 0;
-                        
-                        let totalJmlKemarin = old_a + old_j;
-                        let sisaSaldoKemarin = old_sa - old_a;
-                        
-                        dataObj['j'+i] = totalJmlKemarin !== 0 ? totalJmlKemarin : '';
-                        dataObj['sa'+i] = sisaSaldoKemarin !== 0 ? sisaSaldoKemarin : '';
-                        dataObj['a'+i] = '';
-                    }
-                    alert("🌅 Hari baru! Data rekap kemarin otomatis dipindah ke kolom 'lalu'.");
-                }
-
-                semuaIds.forEach(id => {
-                    if(document.getElementById(id) && dataObj[id] !== undefined) {
-                        document.getElementById(id).value = dataObj[id];
-                    }
-                });
+            if (tempLogs.length > 0) {
+                previewEl.innerText = tempLogs.join(" + ");
+            } else {
+                previewEl.innerText = "";
             }
             
-            // Selalu jalankan hitungan di awal agar hasil angka 0 muncul dengan format benar
-            hitungRekap();
-            hitungStoran();
+            if (grandHistory.length > 0) {
+                grandTotalEl.innerHTML = grandHistory.map(formatNumber).join(' + ') + ` = <span style="color:#ff7b00">${formatNumber(grandTotal)}</span>`;
+            } else {
+                grandTotalEl.innerHTML = "";
+            }
+
+            displayEl.scrollLeft = displayEl.scrollWidth;
+            previewEl.scrollLeft = previewEl.scrollWidth;
+            grandTotalEl.scrollLeft = grandTotalEl.scrollWidth;
         }
 
-        function hapusData(jenis) {
-            let konfirmasi = confirm(`⚠️ Yakin ingin menghapus semua data ${jenis}?`);
-            if(konfirmasi) {
-                let targetIds = jenis === 'rekap' ? rekapIds : storanIds;
-                targetIds.forEach(id => {
-                    if(document.getElementById(id)) {
-                        document.getElementById(id).value = '';
-                    }
-                });
-                if(jenis === 'rekap') hitungRekap();
-                if(jenis === 'storan') hitungStoran();
-                alert(`🗑️ Data ${jenis} telah dikosongkan.`);
+        // FUNGSI GABUNG (MERGE) 2 ANGKA TERAKHIR
+        function handleGabung() {
+            if (!isCustomMode) return;
+
+            if (currentInput !== null) {
+                if (customLogs.length > 0) {
+                    let prevNum = customLogs.pop();
+                    totalSum -= prevNum;
+                    currentInput += prevNum;
+                    updateCustomDisplay();
+                }
+            } else {
+                if (customLogs.length >= 2) {
+                    let lastNum1 = customLogs.pop();
+                    let lastNum2 = customLogs.pop();
+                    totalSum -= (lastNum1 + lastNum2);
+                    currentInput = lastNum1 + lastNum2;
+                    updateCustomDisplay();
+                }
             }
         }
 
-        // Panggil muatData saat web selesai dimuat
-        window.onload = muatData;
+        function commitToGrandTotal() {
+            let activeNum = currentInput !== null ? currentInput : 0;
+            let currentDisplayValue = totalSum + activeNum;
+
+            if (currentDisplayValue === 0 && customLogs.length === 0) return;
+
+            grandHistory.push(currentDisplayValue);
+            grandTotal += currentDisplayValue;
+
+            totalSum = 0;
+            currentInput = null;
+            customLogs = [];
+            
+            updateCustomDisplay();
+        }
+
+        let stdExpression = "";
+        function appendStd(val) {
+            if (displayEl.innerText === "0" || displayEl.innerText === "Error") stdExpression = "";
+            
+            let viewVal = val;
+            if(val === '*') viewVal = '×';
+            if(val === '/') viewVal = '÷';
+            
+            stdExpression += val;
+            displayEl.innerText = stdExpression.replace(/\*/g, '×').replace(/\//g, '÷');
+            displayEl.scrollLeft = displayEl.scrollWidth;
+        }
+
+        function calculateStd() {
+            try {
+                if(!stdExpression) return;
+                let result = eval(stdExpression);
+                if(result.toString().length > 10) result = parseFloat(result.toFixed(5));
+                
+                displayEl.innerText = formatNumber(result);
+                stdExpression = result.toString();
+            } catch(e) {
+                displayEl.innerText = "Error";
+                stdExpression = "";
+            }
+        }
+
+        function handleBackspace() {
+            if (isCustomMode) {
+                if (currentInput !== null) {
+                    let str = currentInput.toString();
+                    if (str.length > 1 && !(str.length === 2 && str.startsWith('-'))) {
+                        currentInput = parseInt(str.slice(0, -1));
+                    } else {
+                        currentInput = null;
+                    }
+                    updateCustomDisplay();
+                } else if (customLogs.length > 0) {
+                    currentInput = customLogs.pop();
+                    totalSum -= currentInput;
+                    updateCustomDisplay();
+                } else if (grandHistory.length > 0 && totalSum === 0 && currentInput === null) {
+                    let removed = grandHistory.pop();
+                    grandTotal -= removed;
+                    updateCustomDisplay();
+                }
+            } else {
+                if (stdExpression.length > 0) {
+                    stdExpression = stdExpression.slice(0, -1);
+                    displayEl.innerText = stdExpression.replace(/\*/g, '×').replace(/\//g, '÷') || "0";
+                }
+            }
+        }
+
+        function handleClear() {
+            if (isCustomMode) {
+                if (totalSum === 0 && currentInput === null && customLogs.length === 0) {
+                    grandTotal = 0;
+                    grandHistory = [];
+                }
+                totalSum = 0; 
+                currentInput = null; 
+                customLogs = [];
+                updateCustomDisplay();
+            } else {
+                stdExpression = "";
+                displayEl.innerText = "0";
+                previewEl.innerText = "";
+            }
+        }
+
+        function copyResult() {
+            let textToCopy = grandTotal > 0 && totalSum === 0 && currentInput === null 
+                ? grandTotal.toString() 
+                : displayEl.innerText.replace(/\./g, ""); 
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Berhasil menyalin angka: " + formatNumber(textToCopy));
+            });
+        }
+
+        function toggleMode() {
+            isCustomMode = !isCustomMode;
+            document.getElementById('custom-mode').style.display = isCustomMode ? 'flex' : 'none';
+            document.getElementById('standard-mode').style.display = isCustomMode ? 'none' : 'block';
+            
+            titleEl.innerText = isCustomMode ? 'Mode Storan' : 'Kalkulator Biasa';
+            counterEl.style.display = isCustomMode ? 'block' : 'none'; 
+            grandTotalEl.style.display = isCustomMode ? 'block' : 'none';
+            
+            handleClear(); 
+        }
     </script>
 </body>
-    </html>
-    
+</html>
